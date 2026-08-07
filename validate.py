@@ -4,6 +4,7 @@ from pathlib import Path
 p = json.loads(Path(__file__).with_name('data').joinpath('schedule.json').read_text())
 stages = p['stages']
 assert len(stages) == 7
+assert {s['name'] for s in stages} == {'Main Stage','MG Stage','Garden Stage','TSP&CO Stage','Joged Stage','TSP Squad Stage','Musicverse Stage'}
 rows = [(stage['name'], t, artist) for stage in stages for t, artist in stage['events']]
 assert len(rows) == len(set(rows))
 assert all(len(t) == 5 and t[2] == '.' for _, t, _ in rows)

@@ -1,16 +1,15 @@
 {
-  "festival": "The Sounds Project Vol. 9",
-  "day": "Day 2",
-  "date": "8 August 2026",
-  "source": "https://www.instagram.com/p/DblJ8felLm-/?img_index=1",
-  "stages": [
+  "festival":"The Sounds Project Vol. 9",
+  "day":"Day 2",
+  "date":"8 August 2026",
+  "source":"https://www.instagram.com/p/DblJ8felLm-/?img_index=1",
+  "stages":[
     {"name":"Main Stage","slide":2,"events":[["15.30","510"],["16.45","Kangen Band"],["19.00","Barasuara"],["20.30","Neck Deep (UK)"],["22.00","Wali"],["23.15","King Nassar"]]},
-    {"name":"MG Stage","slide":3,"events":[["15.45","The SIGIT"],["17.00","Pee Wee Gaskins"],["18.45","Haddad Alwi"],["20.00","FSTVLST"],["21.15","Parade Hujan"],["22.30","Magic! ft. Aldi Taher"]]},
-    {"name":"Joged Stage","slide":4,"events":[["15.45","Banda Neira"],["17.00","Adhitia Sofyan"],["18.45","Silampukau"],["19.15","INIS"],["20.30","Crowdsurfers ft. Faizal Permana"],["22.00","510"]]},
-    {"name":"Garden Stage","slide":5,"events":[["15.15","Gledeg"],["16.30","Ghea Indrawari"],["18.15","Teenage Death Star"],["19.30","The Milo"],["19.45","Jason Ranti & Dongker"],["21.00","Ali"],["22.00","White Chorus"]]},
-    {"name":"TSP Squad Stage","slide":6,"events":[["16.30","Jen"],["18.15","AU ACCESS"],["20.45","Verryans"],["21.00","Tiga Dara"],["22.15","Secret Guest"]]},
+    {"name":"MG Stage","slide":3,"events":[["15.45","The SIGIT"],["17.00","SuaraJaya80"],["18.45","M.KY Boots"],["20.00","Poris"],["21.15","Murphy Radio"],["22.30","Grind Boys"]]},
+    {"name":"Garden Stage","slide":5,"events":[["15.15","Adrian Khalif"],["16.30","Sukses Lancar Rejeki"],["18.30","Kotak"],["19.45","Smash"],["21.00","Tenk"],["22.00","Juan Reza"],["23.15","White Chorus"]]},
     {"name":"TSP&CO Stage","slide":7,"events":[["15.45","Geisha"],["17.00","Societeit de Harmonie"],["19.00","The Cottons"],["20.15","Strangers"],["21.30","Beijing Connection"],["22.45","The Paps"]]},
-    {"name":"Musicverse Stage","slide":8,"events":[["15.30","Sal Priadi"],["16.45","Elephant Kind"],["18.15","Moluccan Soul"],["19.30","IDGITAF"],["20.45","Reality Club"],["22.00","Float"],["23.15","Biru Baru"]]}
+    {"name":"Joged Stage","slide":4,"events":[["15.45","Banda Neira"],["17.00","Adhitia Sofyan"],["18.45","Silampukau"],["20.00","INIS"],["21.15","Crowdsurfers ft. Faizal Permana"]]},
+    {"name":"TSP Squad Stage","slide":6,"events":[["16.30","JEN"],["18.15","ALL ACC3SS"],["19.45","VERRYANS"],["21.00","TIGA DARA"],["22.15","SECRET GUEST"]]},
+    {"name":"Musicverse Stage","slide":8,"events":[["15.30","NPD"],["16.45","Nusantara Beat (NED)"],["18.15","Yura Yunita"],["19.30","IDGITAF"],["20.45","TIPEX"],["22.00","Tribute to L'Arc-en-Ciel by J-Rocks"],["23.15","G-Pluck ft. Bilal Indrajaya"]]}
   ]
 }
-

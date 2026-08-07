@@ -19,7 +19,7 @@ python3 validate.py
 
 Source: [official Instagram carousel](https://www.instagram.com/p/DblJ8felLm-/?img_index=1). Audit detail ada di [`docs/audit.md`](docs/audit.md).
 
-Data Day 2 punya 7 stage dan 43 event. Subject to change without prior notice sesuai sumber resmi.
+Data Day 2 punya 7 stage dan 42 event. Subject to change without prior notice sesuai sumber resmi.
 
 Skipped: framework, build step, external dependency. Add only when schedule editing, deployment, or larger app scope needs them.
 ### Self-check
@@ -40,4 +40,4 @@ Verified against full-resolution Instagram carousel slides in browser. Exact unr
 
 ## Browser smoke
 
-Serve repo over HTTP, load page, confirm 7 stage columns, 43 event cards, select one set, confirm conflict cards disable, click selected card/chip to remove.
+Serve repo over HTTP, load page, confirm 7 stage groups, 42 event cards, select one set, confirm conflict cards disable, click selected card/chip to remove.
