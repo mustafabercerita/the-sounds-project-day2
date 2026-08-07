@@ -1,0 +1,31 @@
+/* Timeline geometry: time, rail, and cards occupy separate grid columns. */
+.timeline{--time-col:48px;--rail-col:16px;--timeline-gap:6px}
+.timeline:before{left:calc(var(--time-col) + var(--timeline-gap) + var(--rail-col) / 2);z-index:0}
+.slot{grid-template-columns:var(--time-col) var(--rail-col) minmax(0,1fr);gap:var(--timeline-gap);align-items:start}
+.rail{grid-column:1;min-width:0;white-space:nowrap;padding:12px 0 0;text-align:right;background:var(--bg)}
+.rail-track{grid-column:2;position:relative;min-height:52px;z-index:1}
+.timeline-dot{position:absolute;top:15px;left:50%;width:8px;height:8px;border:1px solid var(--muted);border-radius:50%;background:var(--bg);transform:translateX(-50%)}
+.timeline-dot.dot-live{background:var(--hot);border-color:var(--hot);box-shadow:0 0 0 4px #ff6b3d25}
+.slot-events{grid-column:3;min-width:0}
+.event:before{display:none}
+@media(max-width:420px){.timeline{--time-col:48px;--rail-col:16px;--timeline-gap:5px}.timeline:before{left:calc(var(--time-col) + var(--timeline-gap) + var(--rail-col) / 2)}.slot{grid-template-columns:var(--time-col) var(--rail-col) minmax(0,1fr)}.event{padding:9px 10px}.event strong{font-size:14px}}
+@media(prefers-reduced-motion:reduce){.timeline-dot{transition:none}}
+@media(min-width:700px){.timeline{--time-col:52px;--rail-col:18px;--timeline-gap:7px}}
+/* ponytail: three-column timeline is deliberately static; proportional duration needs venue data. */
+/* Consolidated late overrides survive the single-line legacy stylesheet. */
+.top-actions{display:flex;align-items:center;gap:14px}
+.timeline{--time-col:48px;--rail-col:16px;--timeline-gap:6px}
+.timeline:before{left:calc(var(--time-col) + var(--timeline-gap) + var(--rail-col) / 2);z-index:0}
+.slot{grid-template-columns:var(--time-col) var(--rail-col) minmax(0,1fr);gap:var(--timeline-gap);align-items:start}
+.rail{grid-column:1;min-width:0;white-space:nowrap;padding:12px 0 0;text-align:right;background:var(--bg)}
+.rail-track{grid-column:2;position:relative;min-height:52px;z-index:1}
+.timeline-dot{position:absolute;top:15px;left:50%;width:8px;height:8px;border:1px solid var(--muted);border-radius:50%;background:var(--bg);transform:translateX(-50%)}
+.timeline-dot.dot-live{background:var(--hot);border-color:var(--hot);box-shadow:0 0 0 4px #ff6b3d25}
+.slot-events{grid-column:3;min-width:0}
+.event:before{display:none}
+@media(max-width:420px){.timeline{--time-col:48px;--rail-col:16px;--timeline-gap:5px}.timeline:before{left:calc(var(--time-col) + var(--timeline-gap) + var(--rail-col) / 2)}.slot{grid-template-columns:var(--time-col) var(--rail-col) minmax(0,1fr)}}
+@media(min-width:700px){.timeline{--time-col:52px;--rail-col:18px;--timeline-gap:7px}}
+/* ponytail: three-column timeline prevents time/dot collision; add venue routing only with coordinates. */
+/* Noise is a tiny data-uri texture, not decorative grid/stripe scaffolding. */
+/* asset cache bust */
+/* loaded */
