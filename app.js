@@ -1,12 +1,41 @@
-const $=s=>document.querySelector(s), min=t=>{const [h,m]=t.split('.').map(Number);return h*60+m}, fmt=n=>`${String(Math.floor(n/60)%24).padStart(2,'0')}.${String(n%60).padStart(2,'0')}`;
-const state={events:[],picked:new Set(JSON.parse(localStorage.getItem('tsp-day2')||'[]'))};
+const $=s=>document.querySelector(s);
+const TZ='Asia/Jakarta', FESTIVAL='2026-08-08', FESTIVAL_START=new Date('2026-08-08T15:15:00+07:00'), FESTIVAL_END=new Date('2026-08-09T01:00:00+07:00');
+const inFestivalWindow=()=>state.now>=FESTIVAL_START&&state.now<FESTIVAL_END;
+const min=t=>{const [h,m]=t.split('.').map(Number);return h*60+m};
+const pad=n=>String(n).padStart(2,'0');
+const timeLabel=n=>`${pad(Math.floor(n/60)%24)}.${pad(n%60)}`;
+const clockLabel=d=>new Intl.DateTimeFormat('id-ID',{timeZone:TZ,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(d).replaceAll(':','.');
+const localDate=(time,next=false)=>new Date(`${FESTIVAL}T${time.replace('.',':')}:00+07:00${next?'':''}`);
+const state={events:[],picked:new Set(JSON.parse(localStorage.getItem('tsp-day2')||'[]')),now:new Date()};
 const overlap=(a,b)=>a.start<b.end&&b.start<a.end;
-function build(data){state.events=data.stages.flatMap((s,si)=>s.events.map(([time,artist],i)=>{const start=min(time), next=s.events[i+1]?.[0];return{id:`${si}-${i}`,stage:s.name,time,artist,start,end:next?min(next):1500}}));}
-function render(){const groups=Object.groupBy(state.events,e=>e.time);$('#timeline').innerHTML=Object.entries(groups).sort(([a],[b])=>min(a)-min(b)).map(([time,items])=>`<div class="slot"><time class="rail">${time}</time><div class="slot-events">${items.map(e=>{const chosen=state.picked.has(e.id);const blocked=!chosen&&[...state.picked].some(id=>{const q=state.events.find(x=>x.id===id);return q&&overlap(e,q)});return `<button class="event ${chosen?'chosen':''} ${blocked?'blocked':''}" data-id="${e.id}" ${blocked?'disabled':''} aria-pressed="${chosen}"><small>${e.stage} · ${time}–${fmt(e.end)}</small><strong>${e.artist}</strong>${blocked?'<em>Bentrok</em>':''}</button>`}).join('')}</div></div>`).join('');document.querySelectorAll('.event').forEach(b=>b.onclick=()=>{state.picked.has(b.dataset.id)?state.picked.delete(b.dataset.id):state.picked.add(b.dataset.id);save();render()});const picked=state.events.filter(e=>state.picked.has(e.id)).sort((a,b)=>a.start-b.start);$('#count').textContent=`${picked.length} set dipilih`;$('#detail').textContent=picked.length?`${fmt(picked[0].start)}–${fmt(picked.at(-1).end)} · set bentrok terkunci`:'Pilih set untuk mulai.';$('#chips').innerHTML=picked.map(e=>`<button class="chip" data-id="${e.id}">${e.time} · ${e.artist} ×</button>`).join('');document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{state.picked.delete(b.dataset.id);save();render()});const lo=915,hi=1500,last=picked.at(-1)?.end??lo;$('#progress').style.width=`${Math.max(0,Math.min(100,(last-lo)/(hi-lo)*100))}%`}
-function save(){localStorage.setItem('tsp-day2',JSON.stringify([...state.picked]))}function reset(){state.picked.clear();save();render()}
-fetch('data/schedule.json').then(r=>r.json()).then(data=>{build(data);render();$('#reset').onclick=reset;$('#clear').onclick=reset}).catch(()=>$('#timeline').textContent='Schedule gagal dimuat.');
-window.__planner={state,render};
-// ponytail: venue movement time is not encoded because source poster provides set times only; add walking buffers when venue map exists.
-
-// Compatibility for browsers without Object.groupBy.
-if(!Object.groupBy)Object.groupBy=(xs,fn)=>xs.reduce((o,x)=>(o[fn(x)]??=[],o[fn(x)].push(x),o),{});
+const isFestivalDay=()=>{const p=new Intl.DateTimeFormat('en-CA',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(state.now);return `${p.find(x=>x.type==='year').value}-${p.find(x=>x.type==='month').value}-${p.find(x=>x.type==='day').value}`===FESTIVAL};
+const eventDate=e=>localDate(e.time);
+function build(data){state.events=data.stages.flatMap((s,si)=>s.events.map(([time,artist],i)=>{const start=min(time),next=s.events[i+1]?.[0],end=next?min(next):1500,dateStart=eventDate({time});return{id:`${si}-${i}`,stage:s.name,time,artist,start,end,dateStart,dateEnd:new Date(dateStart.getTime()+(end-start)*60000)}}));
+  state.picked=new Set([...state.picked].filter(id=>state.events.some(e=>e.id===id)));
+}
+function past(e){return state.now>=e.dateEnd&&state.now>=FESTIVAL_START}
+function live(e){return inFestivalWindow()&&state.now>=e.dateStart&&state.now<e.dateEnd}
+function upcoming(e){return !past(e)&&state.now<e.dateStart&&state.now<FESTIVAL_END}
+function render(){
+  const groups={}; state.events.forEach(e=>(groups[e.time]??=[]).push(e));
+  $('#timeline').innerHTML=Object.entries(groups).sort(([a],[b])=>min(a)-min(b)).map(([time,items])=>`<div class="slot"><time class="rail">${time}</time><div class="slot-events">${items.map(e=>{const chosen=state.picked.has(e.id),done=past(e),blocked=!chosen&&[...state.picked].some(id=>{const q=state.events.find(x=>x.id===id);return q&&overlap(e,q)});const locked=done||blocked;return `<button class="event ${chosen?'chosen':''} ${done?'is-past':''} ${live(e)?'is-live':''} ${blocked?'blocked':''}" data-id="${e.id}" ${locked?'disabled':''} aria-pressed="${chosen}" aria-label="${e.stage} · ${e.time}–${timeLabel(e.end)} ${e.artist}${done?' · selesai':''}"><small>${e.stage} · ${e.time}–${timeLabel(e.end)}</small><strong>${e.artist}</strong>${done?'<em>Selesai</em>':blocked?'<em>Bentrok dengan rute</em>':live(e)?'<em>Live sekarang</em>':''}</button>`}).join('')}</div></div>`).join('');
+  document.querySelectorAll('.event').forEach(b=>b.onclick=()=>toggle(b.dataset.id));
+  const picked=state.events.filter(e=>state.picked.has(e.id)).sort((a,b)=>a.start-b.start);
+  $('#route-count').textContent=`${picked.length} set`;$('#route-detail').textContent=picked.length?`${timeLabel(picked[0].start)}–${timeLabel(picked.at(-1).end)} · bentrok terkunci`:'Pilih set yang ingin ditonton.';
+  $('#chips').innerHTML=picked.map(e=>`<button class="chip ${past(e)?'chip-done':''}" data-id="${e.id}" type="button" ${past(e)?'disabled':''}>${e.time} · ${e.artist} ${past(e)?'✓':'×'}</button>`).join('');document.querySelectorAll('.chip:not(:disabled)').forEach(b=>b.onclick=()=>toggle(b.dataset.id));
+  const lo=915,hi=1500,last=picked.at(-1)?.end??lo;$('#route-progress-fill').style.width=`${Math.max(0,Math.min(100,(last-lo)/(hi-lo)*100))}%`;
+  const current=state.events.filter(live), next=state.events.filter(upcoming).sort((a,b)=>a.dateStart-b.dateStart)[0];
+  $('#current').textContent=current[0]?.artist??(state.now>=FESTIVAL_END?'Selesai malam ini':state.now<FESTIVAL_START?'Belum dimulai':'Tidak ada set aktif');$('#current-meta').textContent=current[0]?`${current[0].stage} · sampai ${timeLabel(current[0].end)}`:state.now>=FESTIVAL_END?'Semua set selesai':state.now<FESTIVAL_START?'Mulai 15.15 WIB':'Menunggu set berikutnya';
+  $('#next').textContent=next?.artist??'Tidak ada lagi';$('#next-meta').textContent=next?`${next.stage} · ${next.time} WIB`:'Program selesai';$('#live-label').textContent=current.length?'Sedang berlangsung':next?'Menunggu set berikutnya':'Selesai';
+  if(current[0])$('#now-progress').style.width=`${Math.max(0,Math.min(100,(state.now-current[0].dateStart)/(current[0].dateEnd-current[0].dateStart)*100))}%`;else $('#now-progress').style.width='0%';
+  $('#event-count').textContent=`${state.events.length} SET · ${dataStageCount()} STAGE`;
+}
+function dataStageCount(){return new Set(state.events.map(e=>e.stage)).size}
+function toggle(id){const e=state.events.find(x=>x.id===id);if(!e||past(e))return;state.picked.has(id)?state.picked.delete(id):state.picked.add(id);save();render()}
+function save(){localStorage.setItem('tsp-day2',JSON.stringify([...state.picked]))}
+function reset(){state.picked.clear();save();render()}
+function tick(){state.now=new Date();$('#clock').textContent=clockLabel(state.now);render()}
+fetch('data/schedule.json').then(r=>{if(!r.ok)throw Error('schedule');return r.json()}).then(data=>{build(data);$('#reset').onclick=reset;$('#clear').onclick=reset;tick();setInterval(tick,1000)}).catch(()=>{$('#timeline').textContent='Schedule gagal dimuat.'});
+window.__planner={state,render,toggle,past};
+// ponytail: timezone is fixed to Asia/Jakarta so device locale cannot shift concert times.
+// Compatibility for older browsers without Object.groupBy is unnecessary; groups use plain objects.
