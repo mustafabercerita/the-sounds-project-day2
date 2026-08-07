@@ -19,5 +19,6 @@ assert mg['17.00'] == 'ELEVENTWELFTH'
 assert mg['18.45'] == 'MKY BOOTS'
 prayers = [('04.42','Subuh'),('11.58','Dzuhur'),('15.20','Ashar'),('17.55','Maghrib'),('19.06','Isya')]
 assert all(len(t) == 5 and t[2] == '.' and 0 < int(t[3:]) <= 59 for t, _ in prayers)
+assert [b[0] for a, b in zip(prayers, prayers[1:])] == ['11.58','15.20','17.55','19.06']
 assert not any(day in artist for _, _, artist in rows for day in ('DAY 1', 'DAY 3'))
 print(f'OK: {len(rows)} events, {len(stages)} stages')

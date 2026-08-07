@@ -7,20 +7,21 @@ const timeLabel=n=>`${pad(Math.floor(n/60)%24)}.${pad(n%60)}`;
 const clockLabel=d=>new Intl.DateTimeFormat('id-ID',{timeZone:TZ,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(d).replaceAll(':','.');
 const localDate=(time,next=false)=>new Date(`${FESTIVAL}T${time.replace('.',':')}:00+07:00${next?'':''}`);
 const PRAYERS=[['04.42','Subuh'],['11.58','Dzuhur'],['15.20','Ashar'],['17.55','Maghrib'],['19.06','Isya']];
-const state={events:[],prayers:[],picked:new Set(JSON.parse(localStorage.getItem('tsp-day2')||'[]')),now:new Date()};
+const prayerOn=()=>localStorage.getItem('tsp-prayers')!=='off';
+const state={events:[],prayers:[],prayerVisible:prayerOn(),picked:new Set(JSON.parse(localStorage.getItem('tsp-day2')||'[]')),now:new Date()};
 const overlap=(a,b)=>a.start<b.end&&b.start<a.end;
 const isFestivalDay=()=>{const p=new Intl.DateTimeFormat('en-CA',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(state.now);return `${p.find(x=>x.type==='year').value}-${p.find(x=>x.type==='month').value}-${p.find(x=>x.type==='day').value}`===FESTIVAL};
 const eventDate=e=>localDate(e.time);
 function build(data){state.events=data.stages.flatMap((s,si)=>s.events.map(([time,artist],i)=>{const start=min(time),next=s.events[i+1]?.[0],end=next?min(next):1500,dateStart=eventDate({time});return{id:`${si}-${i}`,stage:s.name,time,artist,start,end,dateStart,dateEnd:new Date(dateStart.getTime()+(end-start)*60000)}}));
-  state.prayers=PRAYERS.map(([time,name],i)=>{const dateStart=eventDate({time}),start=min(time),end=start+20;return{id:`prayer-${i}`,stage:'Waktu sholat',time,artist:name,start,end,dateStart,dateEnd:new Date(dateStart.getTime()+20*60000),prayer:true}});
+  state.prayers=PRAYERS.map(([time,name],i)=>{const dateStart=eventDate({time}),start=min(time),end=PRAYERS[i+1]?min(PRAYERS[i+1][0]):1500;return{id:`prayer-${i}`,stage:'Waktu sholat',time,artist:name,start,end,dateStart,dateEnd:new Date(dateStart.getTime()+(end-start)*60000),prayer:true}});
   state.picked=new Set([...state.picked].filter(id=>state.events.some(e=>e.id===id)));
 }
 function past(e){return state.now>=e.dateEnd&&state.now>=FESTIVAL_START}
 function live(e){return inFestivalWindow()&&state.now>=e.dateStart&&state.now<e.dateEnd}
 function upcoming(e){return !past(e)&&state.now<e.dateStart&&state.now<FESTIVAL_END}
 function render(){
-  const groups={}; [...state.events,...state.prayers].forEach(e=>(groups[e.time]??=[]).push(e));
-  $('#timeline').innerHTML=Object.entries(groups).sort(([a],[b])=>min(a)-min(b)).map(([time,items])=>`<div class="slot"><time class="rail">${time}</time><div class="slot-events">${items.map(e=>{if(e.prayer)return `<div class="event prayer ${live(e)?'is-live':''} ${past(e)?'is-past':''}" role="note"><small>WAKTU SHOLAT · ${e.time}–${timeLabel(e.end)}</small><strong>◒ ${e.artist}</strong><em>20 menit · tidak mengunci rute</em></div>`;const chosen=state.picked.has(e.id),done=past(e),blocked=!chosen&&[...state.picked].some(id=>{const q=state.events.find(x=>x.id===id);return q&&overlap(e,q)});const locked=done||blocked;return `<button class="event ${chosen?'chosen':''} ${done?'is-past':''} ${live(e)?'is-live':''} ${blocked?'blocked':''}" data-id="${e.id}" ${locked?'disabled':''} aria-pressed="${chosen}" aria-label="${e.stage} · ${e.time}–${timeLabel(e.end)} ${e.artist}${done?' · selesai':''}"><small>${e.stage} · ${e.time}–${timeLabel(e.end)}</small><strong>${e.artist}</strong>${done?'<em>Selesai</em>':blocked?'<em>Bentrok dengan rute</em>':live(e)?'<em>Live sekarang</em>':''}</button>`}).join('')}</div></div>`).join('');
+  const groups={}; [...state.events,...(state.prayerVisible?state.prayers:[])].forEach(e=>(groups[e.time]??=[]).push(e));
+  $('#timeline').innerHTML=Object.entries(groups).sort(([a],[b])=>min(a)-min(b)).map(([time,items])=>`<div class="slot"><time class="rail">${time}</time><div class="slot-events">${items.map(e=>{if(e.prayer)return `<div class="event prayer ${live(e)?'is-live':''} ${past(e)?'is-past':''}" role="note"><small>WAKTU SHOLAT · ${e.time}–${timeLabel(e.end)}</small><strong>◒ ${e.artist}</strong><em>Rentang waktu · tidak mengunci rute</em></div>`;const chosen=state.picked.has(e.id),done=past(e),blocked=!chosen&&[...state.picked].some(id=>{const q=state.events.find(x=>x.id===id);return q&&overlap(e,q)});const locked=done||blocked;return `<button class="event ${chosen?'chosen':''} ${done?'is-past':''} ${live(e)?'is-live':''} ${blocked?'blocked':''}" data-id="${e.id}" ${locked?'disabled':''} aria-pressed="${chosen}" aria-label="${e.stage} · ${e.time}–${timeLabel(e.end)} ${e.artist}${done?' · selesai':''}"><small>${e.stage} · ${e.time}–${timeLabel(e.end)}</small><strong>${e.artist}</strong>${done?'<em>Selesai</em>':blocked?'<em>Bentrok dengan rute</em>':live(e)?'<em>Live sekarang</em>':''}</button>`}).join('')}</div></div>`).join('');
   document.querySelectorAll('.event[data-id]').forEach(b=>b.onclick=()=>toggle(b.dataset.id));
   const picked=state.events.filter(e=>state.picked.has(e.id)).sort((a,b)=>a.start-b.start);
   $('#route-count').textContent=`${picked.length} set`;$('#route-detail').textContent=picked.length?`${timeLabel(picked[0].start)}–${timeLabel(picked.at(-1).end)} · bentrok terkunci`:'Pilih set yang ingin ditonton.';
@@ -37,7 +38,7 @@ function toggle(id){const e=state.events.find(x=>x.id===id);if(!e||past(e))retur
 function save(){localStorage.setItem('tsp-day2',JSON.stringify([...state.picked]))}
 function reset(){state.picked.clear();save();render()}
 function tick(){state.now=new Date();$('#clock').textContent=clockLabel(state.now);render()}
-fetch('data/schedule.json').then(r=>{if(!r.ok)throw Error('schedule');return r.json()}).then(data=>{build(data);$('#reset').onclick=reset;$('#clear').onclick=reset;tick();setInterval(tick,1000)}).catch(()=>{$('#timeline').textContent='Schedule gagal dimuat.'});
+fetch('data/schedule.json').then(r=>{if(!r.ok)throw Error('schedule');return r.json()}).then(data=>{build(data);$('#reset').onclick=reset;$('#clear').onclick=reset;const prayerToggle=$('#prayer-toggle');const syncPrayerButton=()=>{prayerToggle.textContent=`Sholat: ${state.prayerVisible?'on':'off'}`;prayerToggle.setAttribute('aria-pressed',String(state.prayerVisible))};prayerToggle.onclick=()=>{state.prayerVisible=!state.prayerVisible;localStorage.setItem('tsp-prayers',state.prayerVisible?'on':'off');syncPrayerButton();render()};syncPrayerButton();tick();setInterval(tick,1000)}).catch(()=>{$('#timeline').textContent='Schedule gagal dimuat.'});
 window.__planner={state,render,toggle,past};
 // ponytail: timezone is fixed to Asia/Jakarta so device locale cannot shift concert times.
 // Compatibility for older browsers without Object.groupBy is unnecessary; groups use plain objects.
