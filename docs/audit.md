@@ -20,11 +20,11 @@ Source: official carousel, [Instagram post](https://www.instagram.com/p/DblJ8fel
 - Garden: `15.15 Adrian Khalif`, `16.30 Sukses Lancar Rejeki`, `18.30 Kotak`, `19.45 Smash`, `21.00 Tenk`, `22.00 Juan Reza`, `23.15 White Chorus`.
 - TSP Squad: `16.30 JEN`, `18.15 ALL ACC3SS`, `19.45 VERRYANS`, `21.00 TIGA DARA`, `22.15 SECRET GUEST`.
 - Musicverse: `15.30 NPD`, `16.45 Nusantara Beat (NED)`, `18.15 Yura Yunita`, `19.30 IDGITAF`, `20.45 TIPEX`, `22.00 Tribute to L'Arc-en-Ciel by J-Rocks`, `23.15 G-Pluck ft. Bilal Indrajaya`.
-- MG: `15.45 The SIGIT`, `17.00 SuaraJaya80`, `18.45 M.KY Boots`, `20.00 Poris`, `21.15 Murphy Radio`, `22.30 Grind Boys`.
+- MG: `15.45 The SIGIT`, `17.00 ELEVENTWELFTH`, `18.45 MKY BOOTS`, `20.00 Poris`, `21.15 Murphy Radio`, `22.30 Grind Boys`.
 
 ## Unresolved exact rows
 
-None marked unresolved after visual inspection. Source typography is small and anti-aliased; names preserve source casing where useful. Set end times are planner estimates, not official durations.
+None marked unresolved after visual inspection. MG slide 3 reads `17.00 ELEVENTWELFTH` and `18.45 MKY BOOTS`; names preserve source casing. Set end times are planner estimates, not official durations.
 
 ## Counts
 

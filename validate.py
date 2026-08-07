@@ -14,5 +14,8 @@ for stage in stages:
 main = dict(stages[0]['events'])
 for t, artist in {'15.30':'510','16.45':'Kangen Band','19.00':'Barasuara','20.30':'Neck Deep (UK)','22.00':'Wali','23.15':'King Nassar'}.items():
     assert main[t] == artist
+mg = dict(next(s['events'] for s in stages if s['name'] == 'MG Stage'))
+assert mg['17.00'] == 'ELEVENTWELFTH'
+assert mg['18.45'] == 'MKY BOOTS'
 assert not any(day in artist for _, _, artist in rows for day in ('DAY 1', 'DAY 3'))
 print(f'OK: {len(rows)} events, {len(stages)} stages')
